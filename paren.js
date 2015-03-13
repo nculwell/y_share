@@ -13,13 +13,14 @@ function paren_expr(expr, expected_value) {
   }
 
   // Functions that evaluate the operators that are supported by the
-  // expression language.
+  // expression language. The evaluation function looks up the operators
+  // from here and calls the associated functions.
   var ops = {
     '+': function(a, b) { return a + b; },
     '-': function(a, b) { return a - b; },
     '*': function(a, b) { return a * b; },
     '/': function(a, b) { return a / b; }
-  }
+  };
 
   // Verify that this expression is valid. It should consist of numbers
   // alternating with operators.
@@ -65,6 +66,8 @@ function paren_expr(expr, expected_value) {
     // Generate the different possible groupings of this list of terms.
     var grouping_options = [];
     for (var i=1; i < expr.length; i += 2) {
+      // Split the list into two pieces, one on the left side of the
+      // current point in the list, the other on the right side.
       var operator = expr[i];
       var before = expr.slice(0, i);
       var after = expr.slice(i+1);
@@ -73,8 +76,12 @@ function paren_expr(expr, expected_value) {
       dbg(before);
       dbg('after:');
       dbg(after);
+      // For side of the split, call this function recursively to get
+      // all the possible groupings within that sublist.
       var beforeGroups = group(before);
       var afterGroups = group(after);
+      // Generate all the possible pairings of left-side groupings and
+      // right-side groupings.
       for (var b=0; b < beforeGroups.length; b++) {
         for (var a=0; a < afterGroups.length; a++) {
           grouping_options.push(
